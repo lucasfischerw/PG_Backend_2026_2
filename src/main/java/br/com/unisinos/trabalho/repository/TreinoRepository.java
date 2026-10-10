@@ -1,0 +1,4 @@
+package br.com.unisinos.trabalho.repository;
+
+public class TreinoRepository {
+}
