@@ -34,8 +34,14 @@ public class TreinoService {
         this.exercicioRepository = exercicioRepository;
     }
 
-    public List<TreinoDTO> listarTodos() {
-        return treinoRepository.findAll().stream().map(TreinoDTO::deEntidade).toList();
+    public List<TreinoDTO> listarTodos(Long alunoId) {
+        List<Treino> treinos;
+        if (alunoId != null) {
+            treinos = treinoRepository.findByAlunoId(alunoId);
+        } else {
+            treinos = treinoRepository.findAll();
+        }
+        return treinos.stream().map(TreinoDTO::deEntidade).toList();
     }
 
     public Optional<TreinoDTO> buscarPorId(Long id) {
@@ -63,6 +69,25 @@ public class TreinoService {
         return true;
     }
 
+    public Optional<List<TreinoExercicioDTO>> listarItens(Long id) {
+        return treinoRepository.findById(id)
+                .map(treino -> treino.getItens().stream().map(TreinoExercicioDTO::deEntidade).toList());
+    }
+
+    public Optional<TreinoExercicioDTO> adicionarItem(Long id, TreinoExercicioDTO itemDto) {
+        return treinoRepository.findById(id).map(treino -> {
+            treino.getItens().add(novoItem(treino, itemDto));
+            Treino salvo = treinoRepository.saveAndFlush(treino);
+            return TreinoExercicioDTO.deEntidade(salvo.getItens().getLast());
+        });
+    }
+
+    public boolean removerItem(Long id, Long itemId) {
+        return treinoRepository.findById(id)
+                .map(treino -> treino.getItens().removeIf(item -> item.getId().equals(itemId)))
+                .orElse(false);
+    }
+
     private void preencher(Treino treino, TreinoDTO dto) {
         treino.setNome(dto.nome());
         treino.setObjetivo(dto.objetivo());
@@ -73,15 +98,19 @@ public class TreinoService {
         treino.getItens().clear();
         if (dto.itens() != null) {
             for (TreinoExercicioDTO itemDto : dto.itens()) {
-                TreinoExercicio item = new TreinoExercicio();
-                item.setTreino(treino);
-                item.setExercicio(buscarReferencia(exercicioRepository, itemDto.exercicioId(), "Exercicio"));
-                item.setSeries(itemDto.series());
-                item.setRepeticoes(itemDto.repeticoes());
-                item.setCargaKg(itemDto.cargaKg());
-                treino.getItens().add(item);
+                treino.getItens().add(novoItem(treino, itemDto));
             }
         }
+    }
+
+    private TreinoExercicio novoItem(Treino treino, TreinoExercicioDTO itemDto) {
+        TreinoExercicio item = new TreinoExercicio();
+        item.setTreino(treino);
+        item.setExercicio(buscarReferencia(exercicioRepository, itemDto.exercicioId(), "Exercicio"));
+        item.setSeries(itemDto.series());
+        item.setRepeticoes(itemDto.repeticoes());
+        item.setCargaKg(itemDto.cargaKg());
+        return item;
     }
 
     private <T> T buscarReferencia(JpaRepository<T, Long> repository, Long id, String entidade) {

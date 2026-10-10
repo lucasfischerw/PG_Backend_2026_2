@@ -1,9 +1,12 @@
 package br.com.unisinos.trabalho.controller;
 
 import br.com.unisinos.trabalho.dto.TreinoDTO;
+import br.com.unisinos.trabalho.dto.TreinoExercicioDTO;
 import br.com.unisinos.trabalho.service.TreinoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,9 +26,9 @@ public class TreinoController {
     }
 
     @GetMapping
-    @Operation(summary = "Lista todos os treinos")
-    public List<TreinoDTO> listarTodos() {
-        return treinoService.listarTodos();
+    @Operation(summary = "Lista os treinos, opcionalmente filtrando por aluno")
+    public List<TreinoDTO> listarTodos(@RequestParam(name = "aluno", required = false) Long alunoId) {
+        return treinoService.listarTodos(alunoId);
     }
 
     @GetMapping("/{id}")
@@ -38,7 +41,7 @@ public class TreinoController {
 
     @PostMapping
     @Operation(summary = "Cadastra um treino")
-    public ResponseEntity<TreinoDTO> criar(@RequestBody TreinoDTO dto) {
+    public ResponseEntity<TreinoDTO> criar(@Valid @RequestBody TreinoDTO dto) {
         TreinoDTO salvo = treinoService.criar(dto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -49,7 +52,7 @@ public class TreinoController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza um treino")
-    public ResponseEntity<TreinoDTO> atualizar(@PathVariable Long id, @RequestBody TreinoDTO dto) {
+    public ResponseEntity<TreinoDTO> atualizar(@PathVariable Long id, @Valid @RequestBody TreinoDTO dto) {
         return treinoService.atualizar(id, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -64,8 +67,29 @@ public class TreinoController {
         return ResponseEntity.notFound().build();
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> tratarReferenciaInvalida(IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    @GetMapping("/{id}/exercicio")
+    @Operation(summary = "Lista os exercícios de um treino")
+    public ResponseEntity<List<TreinoExercicioDTO>> listarItens(@PathVariable Long id) {
+        return treinoService.listarItens(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/exercicio")
+    @Operation(summary = "Adiciona um exercício a um treino")
+    public ResponseEntity<TreinoExercicioDTO> adicionarItem(@PathVariable Long id,
+                                                            @Valid @RequestBody TreinoExercicioDTO dto) {
+        return treinoService.adicionarItem(id, dto)
+                .map(item -> ResponseEntity.status(HttpStatus.CREATED).body(item))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}/exercicio/{itemId}")
+    @Operation(summary = "Remove um exercício de um treino")
+    public ResponseEntity<Void> removerItem(@PathVariable Long id, @PathVariable Long itemId) {
+        if (treinoService.removerItem(id, itemId)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

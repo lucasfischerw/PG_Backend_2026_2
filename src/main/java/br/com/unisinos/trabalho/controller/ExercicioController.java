@@ -1,9 +1,11 @@
 package br.com.unisinos.trabalho.controller;
 
 import br.com.unisinos.trabalho.dto.ExercicioDTO;
+import br.com.unisinos.trabalho.model.GrupoMuscular;
 import br.com.unisinos.trabalho.service.ExercicioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,9 +25,9 @@ public class ExercicioController {
     }
 
     @GetMapping
-    @Operation(summary = "Lista todos os exercícios")
-    public List<ExercicioDTO> listarTodos() {
-        return exercicioService.listarTodos();
+    @Operation(summary = "Lista os exercícios, opcionalmente filtrando por grupo muscular")
+    public List<ExercicioDTO> listarTodos(@RequestParam(required = false) GrupoMuscular grupoMuscular) {
+        return exercicioService.listarTodos(grupoMuscular);
     }
 
     @GetMapping("/{id}")
@@ -38,7 +40,7 @@ public class ExercicioController {
 
     @PostMapping
     @Operation(summary = "Cadastra um exercício")
-    public ResponseEntity<ExercicioDTO> criar(@RequestBody ExercicioDTO dto) {
+    public ResponseEntity<ExercicioDTO> criar(@Valid @RequestBody ExercicioDTO dto) {
         ExercicioDTO salvo = exercicioService.criar(dto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -49,7 +51,7 @@ public class ExercicioController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza um exercício")
-    public ResponseEntity<ExercicioDTO> atualizar(@PathVariable Long id, @RequestBody ExercicioDTO dto) {
+    public ResponseEntity<ExercicioDTO> atualizar(@PathVariable Long id, @Valid @RequestBody ExercicioDTO dto) {
         return exercicioService.atualizar(id, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

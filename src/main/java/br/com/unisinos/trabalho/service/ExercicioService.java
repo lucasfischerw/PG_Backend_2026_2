@@ -2,6 +2,7 @@ package br.com.unisinos.trabalho.service;
 
 import br.com.unisinos.trabalho.dto.ExercicioDTO;
 import br.com.unisinos.trabalho.model.Exercicio;
+import br.com.unisinos.trabalho.model.GrupoMuscular;
 import br.com.unisinos.trabalho.repository.ExercicioRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,14 @@ public class ExercicioService {
         this.exercicioRepository = exercicioRepository;
     }
 
-    public List<ExercicioDTO> listarTodos() {
-        return exercicioRepository.findAll().stream().map(ExercicioDTO::deEntidade).toList();
+    public List<ExercicioDTO> listarTodos(GrupoMuscular grupoMuscular) {
+        List<Exercicio> exercicios;
+        if (grupoMuscular != null) {
+            exercicios = exercicioRepository.findByGrupoMuscular(grupoMuscular);
+        } else {
+            exercicios = exercicioRepository.findAll();
+        }
+        return exercicios.stream().map(ExercicioDTO::deEntidade).toList();
     }
 
     public Optional<ExercicioDTO> buscarPorId(Long id) {

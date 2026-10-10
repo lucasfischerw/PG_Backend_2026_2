@@ -4,6 +4,7 @@ import br.com.unisinos.trabalho.dto.AlunoDTO;
 import br.com.unisinos.trabalho.service.AlunoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -38,7 +39,7 @@ public class AlunoController {
 
     @PostMapping
     @Operation(summary = "Cadastra um aluno")
-    public ResponseEntity<AlunoDTO> criar(@RequestBody AlunoDTO dto) {
+    public ResponseEntity<AlunoDTO> criar(@Valid @RequestBody AlunoDTO dto) {
         AlunoDTO salvo = alunoService.criar(dto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -49,7 +50,7 @@ public class AlunoController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza um aluno")
-    public ResponseEntity<AlunoDTO> atualizar(@PathVariable Long id, @RequestBody AlunoDTO dto) {
+    public ResponseEntity<AlunoDTO> atualizar(@PathVariable Long id, @Valid @RequestBody AlunoDTO dto) {
         return alunoService.atualizar(id, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
