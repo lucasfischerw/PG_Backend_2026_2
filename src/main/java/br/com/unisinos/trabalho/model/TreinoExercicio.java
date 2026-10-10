@@ -28,4 +28,60 @@ public class TreinoExercicio {
 
     @Column
     private Integer ordem;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Treino getTreino() {
+        return treino;
+    }
+
+    public void setTreino(Treino treino) {
+        this.treino = treino;
+    }
+
+    public Exercicio getExercicio() {
+        return exercicio;
+    }
+
+    public void setExercicio(Exercicio exercicio) {
+        this.exercicio = exercicio;
+    }
+
+    public Integer getSeries() {
+        return series;
+    }
+
+    public void setSeries(Integer series) {
+        this.series = series;
+    }
+
+    public Integer getRepeticoes() {
+        return repeticoes;
+    }
+
+    public void setRepeticoes(Integer repeticoes) {
+        this.repeticoes = repeticoes;
+    }
+
+    public Double getPeso() {
+        return peso;
+    }
+
+    public void setPeso(Double peso) {
+        this.peso = peso;
+    }
+
+    public Integer getOrdem() {
+        return ordem;
+    }
+
+    public void setOrdem(Integer ordem) {
+        this.ordem = ordem;
+    }
 }
