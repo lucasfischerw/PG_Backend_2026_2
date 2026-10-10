@@ -12,9 +12,6 @@ public class Exercicio {
     @Column(nullable = false)
     private String nome;
 
-    @Column(length = 1000)
-    private String descricao;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private GrupoMuscular grupoMuscular;
@@ -33,14 +30,6 @@ public class Exercicio {
 
     public void setNome(String nome) {
         this.nome = nome;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
     }
 
     public GrupoMuscular getGrupoMuscular() {

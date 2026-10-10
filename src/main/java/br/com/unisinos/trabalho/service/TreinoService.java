@@ -1,88 +1,92 @@
 package br.com.unisinos.trabalho.service;
 
-import br.com.unisinos.trabalho.model.Aluno;
-import br.com.unisinos.trabalho.model.Exercicio;
-import br.com.unisinos.trabalho.model.Instrutor;
+import br.com.unisinos.trabalho.dto.TreinoDTO;
+import br.com.unisinos.trabalho.dto.TreinoExercicioDTO;
 import br.com.unisinos.trabalho.model.Treino;
 import br.com.unisinos.trabalho.model.TreinoExercicio;
 import br.com.unisinos.trabalho.repository.AlunoRepository;
 import br.com.unisinos.trabalho.repository.ExercicioRepository;
 import br.com.unisinos.trabalho.repository.InstrutorRepository;
-import br.com.unisinos.trabalho.repository.TreinoExercicioRepository;
 import br.com.unisinos.trabalho.repository.TreinoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class TreinoService {
 
     private final TreinoRepository treinoRepository;
-    private final TreinoExercicioRepository treinoExercicioRepository;
     private final AlunoRepository alunoRepository;
     private final InstrutorRepository instrutorRepository;
     private final ExercicioRepository exercicioRepository;
 
     public TreinoService(TreinoRepository treinoRepository,
-                         TreinoExercicioRepository treinoExercicioRepository,
                          AlunoRepository alunoRepository,
                          InstrutorRepository instrutorRepository,
                          ExercicioRepository exercicioRepository) {
         this.treinoRepository = treinoRepository;
-        this.treinoExercicioRepository = treinoExercicioRepository;
         this.alunoRepository = alunoRepository;
         this.instrutorRepository = instrutorRepository;
         this.exercicioRepository = exercicioRepository;
     }
 
-    public List<Treino> listarTodos() {
-        return treinoRepository.findAll();
+    public List<TreinoDTO> listarTodos() {
+        return treinoRepository.findAll().stream().map(TreinoDTO::deEntidade).toList();
     }
 
-    public Optional<Treino> buscarPorId(Long id) {
-        return treinoRepository.findById(id);
+    public Optional<TreinoDTO> buscarPorId(Long id) {
+        return treinoRepository.findById(id).map(TreinoDTO::deEntidade);
     }
 
-    public List<Treino> buscarPorAluno(Long alunoId) {
-        return treinoRepository.findByAlunoId(alunoId);
+    public TreinoDTO criar(TreinoDTO dto) {
+        Treino treino = new Treino();
+        preencher(treino, dto);
+        return TreinoDTO.deEntidade(treinoRepository.saveAndFlush(treino));
     }
 
-    public List<Treino> buscarPorInstrutor(Long instrutorId) {
-        return treinoRepository.findByInstrutorId(instrutorId);
+    public Optional<TreinoDTO> atualizar(Long id, TreinoDTO dto) {
+        return treinoRepository.findById(id).map(treino -> {
+            preencher(treino, dto);
+            return TreinoDTO.deEntidade(treinoRepository.saveAndFlush(treino));
+        });
     }
 
-    public List<Treino> buscarPorData(LocalDate dataTreino) {
-        return treinoRepository.findByDataTreino(dataTreino);
-    }
-
-    public Treino salvar(Treino treino) {
-        return treinoRepository.save(treino);
-    }
-
-    public void excluir(Long id) {
+    public boolean excluir(Long id) {
+        if (!treinoRepository.existsById(id)) {
+            return false;
+        }
         treinoRepository.deleteById(id);
+        return true;
     }
 
-    public TreinoExercicio adicionarExercicio(Long treinoId, Long exercicioId, Integer series, Integer repeticoes, Double peso, Integer ordem) {
-        Treino treino = treinoRepository.findById(treinoId)
-                .orElseThrow(() -> new RuntimeException("Treino não encontrado"));
-        Exercicio exercicio = exercicioRepository.findById(exercicioId)
-                .orElseThrow(() -> new RuntimeException("Exercicio não encontrado"));
+    private void preencher(Treino treino, TreinoDTO dto) {
+        treino.setNome(dto.nome());
+        treino.setObjetivo(dto.objetivo());
+        treino.setAluno(buscarReferencia(alunoRepository, dto.alunoId(), "Aluno"));
+        treino.setInstrutor(buscarReferencia(instrutorRepository, dto.instrutorId(), "Instrutor"));
 
-        TreinoExercicio treinoExercicio = new TreinoExercicio();
-        treinoExercicio.setTreino(treino);
-        treinoExercicio.setExercicio(exercicio);
-        treinoExercicio.setSeries(series);
-        treinoExercicio.setRepeticoes(repeticoes);
-        treinoExercicio.setPeso(peso);
-        treinoExercicio.setOrdem(ordem);
-
-        return treinoExercicioRepository.save(treinoExercicio);
+        // Composição: os itens pertencem ao treino e são substituídos a cada gravação
+        treino.getItens().clear();
+        if (dto.itens() != null) {
+            for (TreinoExercicioDTO itemDto : dto.itens()) {
+                TreinoExercicio item = new TreinoExercicio();
+                item.setTreino(treino);
+                item.setExercicio(buscarReferencia(exercicioRepository, itemDto.exercicioId(), "Exercicio"));
+                item.setSeries(itemDto.series());
+                item.setRepeticoes(itemDto.repeticoes());
+                item.setCargaKg(itemDto.cargaKg());
+                treino.getItens().add(item);
+            }
+        }
     }
 
-    public List<TreinoExercicio> listarExercicios(Long treinoId) {
-        return treinoExercicioRepository.findByTreinoId(treinoId);
+    private <T> T buscarReferencia(JpaRepository<T, Long> repository, Long id, String entidade) {
+        return Optional.ofNullable(id)
+                .flatMap(repository::findById)
+                .orElseThrow(() -> new IllegalArgumentException(entidade + " não encontrado: " + id));
     }
 }

@@ -1,15 +1,19 @@
 package br.com.unisinos.trabalho.controller;
 
-import br.com.unisinos.trabalho.model.Aluno;
+import br.com.unisinos.trabalho.dto.AlunoDTO;
 import br.com.unisinos.trabalho.service.AlunoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/alunos")
+@RequestMapping("/aluno")
+@Tag(name = "Aluno", description = "Cadastro de alunos")
 public class AlunoController {
 
     private final AlunoService alunoService;
@@ -19,39 +23,42 @@ public class AlunoController {
     }
 
     @GetMapping
-    public List<Aluno> listarTodos() {
+    @Operation(summary = "Lista todos os alunos")
+    public List<AlunoDTO> listarTodos() {
         return alunoService.listarTodos();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Aluno> buscarPorId(@PathVariable Long id) {
+    @Operation(summary = "Busca um aluno pelo id")
+    public ResponseEntity<AlunoDTO> buscarPorId(@PathVariable Long id) {
         return alunoService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Aluno> criar(@RequestBody Aluno aluno) {
-        Aluno salvo = alunoService.salvar(aluno);
-        URI location = URI.create("/alunos/" + salvo.getId());
+    @Operation(summary = "Cadastra um aluno")
+    public ResponseEntity<AlunoDTO> criar(@RequestBody AlunoDTO dto) {
+        AlunoDTO salvo = alunoService.criar(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(salvo.id())
+                .toUri();
         return ResponseEntity.created(location).body(salvo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Aluno> atualizar(@PathVariable Long id, @RequestBody Aluno aluno) {
-        return alunoService.buscarPorId(id)
-                .map(alunoExistente -> {
-                    aluno.setNome(aluno.getNome());
-                    aluno.setEmail(aluno.getEmail());
-                    return ResponseEntity.ok(alunoService.salvar(aluno));
-                })
+    @Operation(summary = "Atualiza um aluno")
+    public ResponseEntity<AlunoDTO> atualizar(@PathVariable Long id, @RequestBody AlunoDTO dto) {
+        return alunoService.atualizar(id, dto)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Exclui um aluno")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        if (alunoService.buscarPorId(id).isPresent()) {
-            alunoService.excluir(id);
+        if (alunoService.excluir(id)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

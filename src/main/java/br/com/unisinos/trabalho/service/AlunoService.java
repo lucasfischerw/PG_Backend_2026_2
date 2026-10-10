@@ -1,5 +1,6 @@
 package br.com.unisinos.trabalho.service;
 
+import br.com.unisinos.trabalho.dto.AlunoDTO;
 import br.com.unisinos.trabalho.model.Aluno;
 import br.com.unisinos.trabalho.repository.AlunoRepository;
 import org.springframework.stereotype.Service;
@@ -16,23 +17,37 @@ public class AlunoService {
         this.alunoRepository = alunoRepository;
     }
 
-    public List<Aluno> listarTodos() {
-        return alunoRepository.findAll();
+    public List<AlunoDTO> listarTodos() {
+        return alunoRepository.findAll().stream().map(AlunoDTO::deEntidade).toList();
     }
 
-    public Optional<Aluno> buscarPorId(Long id) {
-        return alunoRepository.findById(id);
+    public Optional<AlunoDTO> buscarPorId(Long id) {
+        return alunoRepository.findById(id).map(AlunoDTO::deEntidade);
     }
 
-    public Optional<Aluno> buscarPorEmail(String email) {
-        return alunoRepository.findByEmail(email);
+    public AlunoDTO criar(AlunoDTO dto) {
+        Aluno aluno = new Aluno();
+        preencher(aluno, dto);
+        return AlunoDTO.deEntidade(alunoRepository.save(aluno));
     }
 
-    public Aluno salvar(Aluno aluno) {
-        return alunoRepository.save(aluno);
+    public Optional<AlunoDTO> atualizar(Long id, AlunoDTO dto) {
+        return alunoRepository.findById(id).map(aluno -> {
+            preencher(aluno, dto);
+            return AlunoDTO.deEntidade(alunoRepository.save(aluno));
+        });
     }
 
-    public void excluir(Long id) {
+    public boolean excluir(Long id) {
+        if (!alunoRepository.existsById(id)) {
+            return false;
+        }
         alunoRepository.deleteById(id);
+        return true;
+    }
+
+    private void preencher(Aluno aluno, AlunoDTO dto) {
+        aluno.setNome(dto.nome());
+        aluno.setEmail(dto.email());
     }
 }

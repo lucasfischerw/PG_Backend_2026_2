@@ -24,10 +24,7 @@ public class TreinoExercicio {
     private Integer repeticoes;
 
     @Column
-    private Double peso;
-
-    @Column
-    private Integer ordem;
+    private Double cargaKg;
 
     public Long getId() {
         return id;
@@ -69,19 +66,11 @@ public class TreinoExercicio {
         this.repeticoes = repeticoes;
     }
 
-    public Double getPeso() {
-        return peso;
+    public Double getCargaKg() {
+        return cargaKg;
     }
 
-    public void setPeso(Double peso) {
-        this.peso = peso;
-    }
-
-    public Integer getOrdem() {
-        return ordem;
-    }
-
-    public void setOrdem(Integer ordem) {
-        this.ordem = ordem;
+    public void setCargaKg(Double cargaKg) {
+        this.cargaKg = cargaKg;
     }
 }

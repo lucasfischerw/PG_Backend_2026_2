@@ -2,8 +2,6 @@ package br.com.unisinos.trabalho.model;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
-
 @Entity
 public class Instrutor {
 
@@ -15,16 +13,7 @@ public class Instrutor {
     private String nome;
 
     @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String especialidade;
-
-    @Column(name = "data_nascimento")
-    private LocalDate dataNascimento;
-
-    @Column(name = "telefone")
-    private String telefone;
+    private String cref;
 
     public Long getId() {
         return id;
@@ -42,35 +31,11 @@ public class Instrutor {
         this.nome = nome;
     }
 
-    public String getEmail() {
-        return email;
+    public String getCref() {
+        return cref;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getEspecialidade() {
-        return especialidade;
-    }
-
-    public void setEspecialidade(String especialidade) {
-        this.especialidade = especialidade;
-    }
-
-    public LocalDate getDataNascimento() {
-        return dataNascimento;
-    }
-
-    public void setDataNascimento(LocalDate dataNascimento) {
-        this.dataNascimento = dataNascimento;
-    }
-
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
+    public void setCref(String cref) {
+        this.cref = cref;
     }
 }

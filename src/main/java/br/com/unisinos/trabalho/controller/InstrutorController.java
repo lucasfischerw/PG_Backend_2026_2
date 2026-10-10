@@ -1,15 +1,19 @@
 package br.com.unisinos.trabalho.controller;
 
-import br.com.unisinos.trabalho.model.Instrutor;
+import br.com.unisinos.trabalho.dto.InstrutorDTO;
 import br.com.unisinos.trabalho.service.InstrutorService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/instrutores")
+@RequestMapping("/instrutor")
+@Tag(name = "Instrutor", description = "Cadastro de instrutores")
 public class InstrutorController {
 
     private final InstrutorService instrutorService;
@@ -19,38 +23,42 @@ public class InstrutorController {
     }
 
     @GetMapping
-    public List<Instrutor> listarTodos() {
+    @Operation(summary = "Lista todos os instrutores")
+    public List<InstrutorDTO> listarTodos() {
         return instrutorService.listarTodos();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Instrutor> buscarPorId(@PathVariable Long id) {
+    @Operation(summary = "Busca um instrutor pelo id")
+    public ResponseEntity<InstrutorDTO> buscarPorId(@PathVariable Long id) {
         return instrutorService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Instrutor> criar(@RequestBody Instrutor instrutor) {
-        Instrutor salvo = instrutorService.salvar(instrutor);
-        URI location = URI.create("/instrutores/" + salvo.getId());
+    @Operation(summary = "Cadastra um instrutor")
+    public ResponseEntity<InstrutorDTO> criar(@RequestBody InstrutorDTO dto) {
+        InstrutorDTO salvo = instrutorService.criar(dto);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(salvo.id())
+                .toUri();
         return ResponseEntity.created(location).body(salvo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Instrutor> atualizar(@PathVariable Long id, @RequestBody Instrutor instrutor) {
-        return instrutorService.buscarPorId(id)
-                .map(i -> {
-                    instrutor.setId(id);
-                    return ResponseEntity.ok(instrutorService.salvar(instrutor));
-                })
+    @Operation(summary = "Atualiza um instrutor")
+    public ResponseEntity<InstrutorDTO> atualizar(@PathVariable Long id, @RequestBody InstrutorDTO dto) {
+        return instrutorService.atualizar(id, dto)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Exclui um instrutor")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        if (instrutorService.buscarPorId(id).isPresent()) {
-            instrutorService.excluir(id);
+        if (instrutorService.excluir(id)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

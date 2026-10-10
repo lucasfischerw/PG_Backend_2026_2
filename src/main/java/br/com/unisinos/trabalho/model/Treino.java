@@ -2,7 +2,6 @@ package br.com.unisinos.trabalho.model;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +12,8 @@ public class Treino {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "data_treino", nullable = false)
-    private LocalDate dataTreino;
+    @Column(nullable = false)
+    private String nome;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -29,7 +28,7 @@ public class Treino {
     private Instrutor instrutor;
 
     @OneToMany(mappedBy = "treino", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TreinoExercicio> treinoExercicios = new ArrayList<>();
+    private List<TreinoExercicio> itens = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -39,12 +38,12 @@ public class Treino {
         this.id = id;
     }
 
-    public LocalDate getDataTreino() {
-        return dataTreino;
+    public String getNome() {
+        return nome;
     }
 
-    public void setDataTreino(LocalDate dataTreino) {
-        this.dataTreino = dataTreino;
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
     public ObjetivoTreino getObjetivo() {
@@ -71,11 +70,11 @@ public class Treino {
         this.instrutor = instrutor;
     }
 
-    public List<TreinoExercicio> getTreinoExercicios() {
-        return treinoExercicios;
+    public List<TreinoExercicio> getItens() {
+        return itens;
     }
 
-    public void setTreinoExercicios(List<TreinoExercicio> treinoExercicios) {
-        this.treinoExercicios = treinoExercicios;
+    public void setItens(List<TreinoExercicio> itens) {
+        this.itens = itens;
     }
 }

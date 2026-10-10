@@ -1,7 +1,7 @@
 package br.com.unisinos.trabalho.service;
 
+import br.com.unisinos.trabalho.dto.ExercicioDTO;
 import br.com.unisinos.trabalho.model.Exercicio;
-import br.com.unisinos.trabalho.model.GrupoMuscular;
 import br.com.unisinos.trabalho.repository.ExercicioRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,23 +17,37 @@ public class ExercicioService {
         this.exercicioRepository = exercicioRepository;
     }
 
-    public List<Exercicio> listarTodos() {
-        return exercicioRepository.findAll();
+    public List<ExercicioDTO> listarTodos() {
+        return exercicioRepository.findAll().stream().map(ExercicioDTO::deEntidade).toList();
     }
 
-    public Optional<Exercicio> buscarPorId(Long id) {
-        return exercicioRepository.findById(id);
+    public Optional<ExercicioDTO> buscarPorId(Long id) {
+        return exercicioRepository.findById(id).map(ExercicioDTO::deEntidade);
     }
 
-    public List<Exercicio> buscarPorGrupoMuscular(GrupoMuscular grupoMuscular) {
-        return exercicioRepository.findByGrupoMuscular(grupoMuscular);
+    public ExercicioDTO criar(ExercicioDTO dto) {
+        Exercicio exercicio = new Exercicio();
+        preencher(exercicio, dto);
+        return ExercicioDTO.deEntidade(exercicioRepository.save(exercicio));
     }
 
-    public Exercicio salvar(Exercicio exercicio) {
-        return exercicioRepository.save(exercicio);
+    public Optional<ExercicioDTO> atualizar(Long id, ExercicioDTO dto) {
+        return exercicioRepository.findById(id).map(exercicio -> {
+            preencher(exercicio, dto);
+            return ExercicioDTO.deEntidade(exercicioRepository.save(exercicio));
+        });
     }
 
-    public void excluir(Long id) {
+    public boolean excluir(Long id) {
+        if (!exercicioRepository.existsById(id)) {
+            return false;
+        }
         exercicioRepository.deleteById(id);
+        return true;
+    }
+
+    private void preencher(Exercicio exercicio, ExercicioDTO dto) {
+        exercicio.setNome(dto.nome());
+        exercicio.setGrupoMuscular(dto.grupoMuscular());
     }
 }
