@@ -1,0 +1,1 @@
+Gravação do vídeo [aqui](https://asavbrm-my.sharepoint.com/:v:/g/personal/rodrigofilho_edu_unisinos_br/IQC67jp91NONTKFJNoxr9nThAccOV6eauh0t48-fexdu_sw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D)
